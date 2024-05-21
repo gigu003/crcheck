@@ -4,7 +4,14 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Qiong", "Chen", , "chenqiong@hnccr.org.cn", role = c("aut", "cre"),
            comment = c(ORCID = "https://orcid.org/0000-0003-2401-0046"))
-Description: What the package does (one paragraph).
+Description: The iarccheck package is designed to perform internal and
+        consistent checks for cancer registration individual cases based on
+        the International Agency for Research on Cancer (IARC) standards. It
+        provides a suite of functions to check the validation and consistency
+        of data items such as sex, age, site, morphology, behavior, and grade,
+        as well as combinations of these data items. By systematically auditing
+        these data elements, iarccheck helps maintain high-quality cancer
+        registry data, supporting reliable cancer research and reporting.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
