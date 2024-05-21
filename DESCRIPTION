@@ -1,0 +1,13 @@
+Package: iacrcheck
+Title: Checking for Validity and Consistency of Cancer Registration Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("Qiong", "Chen", , "chenqiong@hnccr.org.cn", role = c("aut", "cre"),
+           comment = c(ORCID = "https://orcid.org/0000-0003-2401-0046"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends: 
+    R (>= 2.10)
