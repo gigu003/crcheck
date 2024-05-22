@@ -1,4 +1,4 @@
-Package: iacrcheck
+Package: crcheck
 Title: Checking for Validity and Consistency of Cancer Registration Data
 Version: 0.0.0.9000
 Authors@R: 

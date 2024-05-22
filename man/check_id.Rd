@@ -34,12 +34,13 @@ or other types of information based on the 'return' parameter.
 Check if the Chinese ID number complies with the GB 11643-1999 standard.
 }
 \examples{
-ids <- c("412726198407240038", "110101199003070975",
-         "310101199001010101", "440101199102030303")
+ids <- c(
+  "412726198407240038", "110101199003070975",
+  "310101199001010101", "440101199102030303"
+)
 check_id(ids)
 check_id(ids, return = "date")
 check_id(ids, return = "areacode")
 check_id(ids, return = "formatted")
-
 
 }

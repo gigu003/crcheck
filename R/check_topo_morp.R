@@ -11,8 +11,8 @@
 #' morp <- c(8140, 8500, 8500, 8600)
 #' check_topo_morp(topo, morp)
 check_topo_morp <- function(topo = c("C15.2", "C33.9"), morp = c(8240, 8012)) {
-  data <- list(topo=topo, morp=morp)
-  check_tm <- function(x){
+  data <- list(topo = topo, morp = morp)
+  check_tm <- function(x) {
     if (x <= 64) {
       morp %in% check_site_morp[[1]][[x]] & topo %nin% check_site_morp[[2]][[x]]
     } else {
@@ -21,20 +21,23 @@ check_topo_morp <- function(topo = c("C15.2", "C33.9"), morp = c(8240, 8012)) {
   }
   result <- lapply(1:71, check_tm)
   res_matrix <- do.call(rbind, result)
-  groups <- apply(res_matrix, 2, function(x) which(x == TRUE, arr.ind = TRUE)[1])
+  groups <- apply(res_matrix, 2, function(x) {
+    which(x == TRUE, arr.ind = TRUE)[1]
+  })
   groups <- ifelse(is.na(groups), 0, groups)
   groups <- groups + 100
   check <- !Reduce(`|`, result)
   type <- ifelse(check, 1, 2)
   res <- list()
-  class(res) <- c("check","topo/morp")
+  class(res) <- c("check", "topo/morp")
   res$check_item <- "Site/Histology"
   res$check_version <- "IARC Check Rules 2005"
   res$data <- data
   res$check <- check
   res$type <- factor(type,
-                     levels = c(1:3),
-                     labels = c("correct", "warning", "error"))
+    levels = c(1:3),
+    labels = c("correct", "warning", "error")
+  )
   res$message <- groups
   print(res)
   invisible(res)

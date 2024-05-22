@@ -14,6 +14,6 @@ print.check <- function(x, ...) {
   invisible(x)
 }
 
-'%nin%' <- function(chrVElements, chrVSet){
-  !(chrVElements %in% chrVSet)
+"%nin%" <- function(chrvelements, chrvset) {
+  !(chrvelements %in% chrvset)
 }

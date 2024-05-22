@@ -4,12 +4,12 @@
 \alias{gen_topo}
 \title{generate legal ICDO3 Topo code}
 \usage{
-gen_topo(x, na.drop = TRUE)
+gen_topo(x, na_drop = TRUE)
 }
 \arguments{
 \item{x}{Number between 0 and 809}
 
-\item{na.drop}{Drop illegal code or not.}
+\item{na_drop}{Drop illegal code or not.}
 }
 \value{
 A vector of legeal TOPO codes.
@@ -18,5 +18,5 @@ A vector of legeal TOPO codes.
 generate legal ICDO3 Topo code
 }
 \examples{
- gen_topo(1:169)
+gen_topo(1:169)
 }
