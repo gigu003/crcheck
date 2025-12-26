@@ -2,18 +2,18 @@
 % Please edit documentation in R/print.R
 \name{print.check}
 \alias{print.check}
-\title{Title}
+\title{Print list of check result}
 \usage{
 \method{print}{check}(x, ...)
 }
 \arguments{
-\item{x}{check class}
+\item{x}{Object of class 'check'}
 
-\item{...}{other}
+\item{...}{Other parameters.}
 }
 \value{
-print
+A data frame.
 }
 \description{
-Title
+Print list of check result
 }

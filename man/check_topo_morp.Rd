@@ -2,23 +2,47 @@
 % Please edit documentation in R/check_topo_morp.R
 \name{check_topo_morp}
 \alias{check_topo_morp}
-\title{Check the combination of TOPO and MORP.}
+\title{Check the combination of topography and morphology}
 \usage{
-check_topo_morp(topo = c("C15.2", "C33.9"), morp = c(8240, 8012))
+check_topo_morp(topo, morp, std = "iacr", quiet = FALSE)
 }
 \arguments{
-\item{topo}{TOPO code of ICDO3}
+\item{topo}{A character vector containing the topography part of ICD-O-3
+codes (e.g., "C50.9").}
 
-\item{morp}{MOPR code of ICDO3}
+\item{morp}{A character vector containing the morphology part of ICD-O-3
+codes (e.g., "8000" or \code{c("8000", "8070", "8140")}).}
+
+\item{std}{A character string indicating the standard to use.
+Options are "iarc" (default) or "encr".}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-Class of check and topo/morp
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
-Check the combination of TOPO and MORP.
+Validates combinations of topography (ICD-O-3 site) and morphology (ICD-O-3
+histology) codes using standard tumor coding rules. Supports IARC (2005)
+standards for assessing whether a given topography/morphology
+pairing is considered valid, invalid, or discouraged.
 }
 \examples{
 topo <- c("C15.1", "C06.9", "C16.2", "C34.9")
 morp <- c(8140, 8500, 8500, 8600)
-check_topo_morp(topo, morp)
+res <- check_topo_morp(topo, morp)
+print(res)
 }

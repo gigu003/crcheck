@@ -1,0 +1,40 @@
+## code to prepare `encr_rules` dataset goes here
+library(dplyr)
+source("./data-raw/ENCR_GradMorpRule.R")
+source("./data-raw/ENCR_AgeTopoMorpRule.R")
+source("./data-raw/ENCR_SexMorpRule.R")
+source("./data-raw/ENCR_SexTopoRule.R")
+source("./data-raw/ENCR_BasiMorpRule.R")
+source("./data-raw/ENCR_BehaMorpRule.R")
+source("./data-raw/ENCR_TopoMorpBehaGradRule.R")
+source("./data-raw/ENCR_TopoMorpRule.R")
+source("./data-raw/ValueRange.R")
+source("./data-raw/IARC_AgeTopoMorpRule.R")
+source("./data-raw/IARC_GradMorpRule.R")
+source("./data-raw/IARC_TopoMorpRule.R")
+source("./data-raw/IARC_BehaMorpRule.R")
+source("./data-raw/IARC_BasiMorpRule.R")
+source("./data-raw/ICDO3_2.R")
+source("./data-raw/SEER_ICDO3toICD10Rule.R")
+source("./data-raw/ICCC3Rule.R")
+source("./data-raw/SchemaHeader.R")
+usethis::use_data(
+  ENCR_AgeTopoMorpRule,
+  ENCR_BasiMorpRule,
+  ENCR_BehaMorpRule,
+  ENCR_GradMorpRule,
+  ENCR_SexMorpRule,
+  ENCR_SexTopoRule,
+  ENCR_TopoMorpBehaGradRule,
+  ENCR_TopoMorpRule,
+  IARC_AgeTopoMorpRule,
+  IARC_GradMorpRule,
+  IARC_TopoMorpRule,
+  IARC_BehaMorpRule,
+  IARC_BasiMorpRule,
+  SEER_ICDO3toICD10Rule,
+  SchemaHeader,
+  ValueRange,
+  overwrite = TRUE,
+  internal = TRUE
+)

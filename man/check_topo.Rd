@@ -2,22 +2,49 @@
 % Please edit documentation in R/check_topo.R
 \name{check_topo}
 \alias{check_topo}
-\title{Verify if the topographic site codes for ICDO3 comply with the ICDO3
-coding rules.}
+\title{Verify whether characters comply with ICD-O-3 topography coding rules}
 \usage{
-check_topo(x)
+check_topo(topo, quiet = FALSE)
 }
 \arguments{
-\item{x}{Character vector contains the topographic site codes for ICDO3.}
+\item{topo}{A character vector containing the topography part of ICD-O-3
+codes (e.g., "C50.9").}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-check_topo returns an object of class of 'check'.
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
-Verify if the topographic site codes for ICDO3 comply with the ICDO3
-coding rules.
+\code{check_topo()} verifies whether a character vector contains valid ICD-O-3
+topography codes, which represent anatomical cancer sites (e.g., "C50.9").
+It checks each code for correct format, valid value range, and presence of
+missing values. Codes with formatting issues (e.g., missing decimal points
+or incorrect patterns) or values outside the acceptable range are flagged.
+}
+\details{
+For detailed coding rules, refer to the official ICD-O-3 guidelines:
+\url{http://www.iacr.com.fr/index.php?Itemid=577}.
 }
 \examples{
 topos <- c("C50.9", "16.2", "C151", "33.2")
-check_topo(topos)
+res <- check_topo(topos)
+print(res)
+
+topos <- c("C34.0", "C16.2", "C151", NA)
+res <- check_topo(topos, quiet = TRUE)
+print(res)
 }

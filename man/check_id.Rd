@@ -2,45 +2,43 @@
 % Please edit documentation in R/check_id.R
 \name{check_id}
 \alias{check_id}
-\title{Check if the Chinese ID number complies with the GB 11643-1999 standard.}
+\title{Check whether ID numbers comply with the GB11643-1999 in China.}
 \usage{
-check_id(x, return = "logical")
+check_id(x, quiet = FALSE)
 }
 \arguments{
-\item{x}{A character vector containing Chinese ID numbers to be checked for
-compliance with the GB 11643-1999 standard.}
+\item{x}{A character vector containing Chinese ID numbers.}
 
-\item{return}{A character string used to specific the type of result
-returned. Options are 'logical', 'date', 'areacode', 'formatted'.
-Options include:
-\itemize{
-\item{'logical': Logical vector (default). Indicates whether
-each input ID number complies with the standard (TRUE for
-compliant, FALSE for non-compliant).}
-\item{'date': Date vector representing birth date contained in
-the ID number.}
-\item{'areacode': Character vector containing administrative
-region codes extracted from the ID number.}
-\item{'formatted': Character vector containing formatted ID
-numbers.}
-}}
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-A logical vector indicating whether each input ID number complies
-with the standard (TRUE for compliant, FALSE for non-compliant),
-or other types of information based on the 'return' parameter.
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
-Check if the Chinese ID number complies with the GB 11643-1999 standard.
+This function validates Chinese citizen ID numbers based on the national
+standard GB 11643-1999. It checks the overall format, verifies the birth
+date portion, and validates the final check digit using the official
+algorithm.
 }
 \examples{
 ids <- c(
   "412726198407240038", "110101199003070975",
   "310101199001010101", "440101199102030303"
 )
-check_id(ids)
-check_id(ids, return = "date")
-check_id(ids, return = "areacode")
-check_id(ids, return = "formatted")
+res <- check_id(ids)
+print(res)
 
 }

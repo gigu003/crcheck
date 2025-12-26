@@ -4,15 +4,35 @@
 \alias{check_morp_beha}
 \title{Check the morphology and behavior code in ICDO3}
 \usage{
-check_morp_beha(morp, beha)
+check_morp_beha(morp, beha, std = "iacr", quiet = FALSE)
 }
 \arguments{
-\item{morp}{Morphology codes.}
+\item{morp}{A character vector containing the morphology part of ICD-O-3
+codes (e.g., "8000" or \code{c("8000", "8070", "8140")}).}
 
-\item{beha}{Behavior codes.}
+\item{beha}{A character vector containing the behavior codes of the ICD-O-3
+codes, (e.g., "3" or \code{c("1", "2", "5")}).}
+
+\item{std}{A character string indicating the standard to use.
+Options are "iarc" (default) or "encr".}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-check_morp returns an object of class of 'check'.
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
 Check the morphology and behavior code in ICDO3
@@ -20,4 +40,6 @@ Check the morphology and behavior code in ICDO3
 \examples{
 morp <- c(8000, 8010, 8140, 8533, 9000)
 beha <- c(3, 3, 3, 3, 1)
+res <- check_morp_beha(morp, beha)
+print(res)
 }

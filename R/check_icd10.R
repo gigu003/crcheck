@@ -1,59 +1,44 @@
 #' Check the ICD10 code in the tumor part.
 #'
-#' @param icd10 The ICD10 codes.
+#' @template icd10
+#' @template quiet
 #'
-#' @return check_icd10 returns an object of class of 'check'.
-#'
+#' @template return
 #' @export
 #'
 #' @examples
-#'
-#' icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2")
+#' icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2", "c15.2")
 #' res <- check_icd10(icd10)
-check_icd10 <- function(icd10) {
-  init_letter <- substring(icd10, 1, 1)
-  icd_number <- as.numeric(gsub("[^0-9\\.]", "", icd10))
-  ress <- ifelse(
-    toupper(init_letter) == "D",
-    gen_icd10(icd_number * 10, "D"),
-    ifelse(toupper(init_letter) == "C", gen_icd10(icd_number * 10), NA)
+#' print(res)
+check_icd10 <- function(icd10, quiet = TRUE) {
+  miss_valid <- is.na(icd10)
+  form_valid <- !valid_icd10(icd10)
+  range_valid <- unlist(lapply(icd10, range_check))
+  #generate result data
+  data <- list(icd10 = icd10)
+  check <- !Reduce('|', list(miss_valid, form_valid, range_valid))
+  type <- ifelse(check, 1, 3)
+  error_code <- ifelse(miss_valid, "E-MISS",
+                       ifelse(form_valid, "E-FORM",
+                              ifelse(range_valid, "E-OUTR", "C"))
   )
-  check <- ress == icd10
-  check <- ifelse(is.na(check), FALSE, check)
-
-  range_check <- ifelse(
-    toupper(init_letter) == "C",
-    !icd_number %in% (not_icd10$C / 10) &
-      icd_number >= 0 &
-      icd_number <= 97,
-    ifelse(
-      toupper(init_letter) == "D",
-      (!icd_number %in% (not_icd10$D / 10)) &
-        icd_number >= 0 &
-        icd_number <= 488,
-      NA
-    )
-  )
-
-  init_letter_logi <- init_letter %in% c("c", "d")
-  type <- ifelse(is.na(ress), 3, ifelse(init_letter_logi, 2, 1))
-
-  message <- ifelse(!init_letter %in% c("C", "D"), 1,
-    ifelse(!range_check, 2, 0)
-  )
+  error_desc <- ifelse(miss_valid, "001",
+                       ifelse(form_valid, "002",
+                              ifelse(range_valid, "003", "0")))
+  #output result
   res <- list()
   class(res) <- c("check", "icd10")
   res$check_item <- "ICD10"
-  res$check_version <- "ICD10 2019"
-  res$data <- icd10
+  res$check_standard <- "ICD10"
+  res$check_version <- "ICD102019"
+  res$data <- data
   res$check <- check
-  res$type <- factor(type,
-    levels = c(1:3),
-    labels = c("correct", "warning", "error")
-  )
-  res$message <- message
-  res$correct <- ress
-  print(res)
+  res$type <- type
+  res$error_code <- error_code
+  res$error_desc <- error_desc
+  if (!quiet) {
+    summary(res)  
+  }
   invisible(res)
 }
 
@@ -63,35 +48,22 @@ valid_icd10 <- function(icd10) {
                  65, 66, 73, 97)
   special_d <- c(24, 27, 34, 45)
   special_icd10 <- c(sprintf("C%02d", special_c), paste0("D", special_d))
-  pattern <- "^[CD]\\d{2}\\.\\d$"
-  res <- grepl(pattern, icd10) | icd10 %in% special_icd10
-  return(res)
+  special2 <- icd10 %nin% paste0(special_icd10,".0")
+  regular <- grepl("^[CD]\\d{2}\\.\\d$", icd10)
+  check <- ifelse(icd10 %in% special_icd10, TRUE,
+                  ifelse(regular & special2, TRUE, FALSE))
+  return(check)
 }
 
-
-gen_icd10 <- function(x, init = "C", na_drop = FALSE) {
-  if (init == "C") {
-    x <- ifelse(x %in% not_icd10$C | x > 979, NA, x)
-    if (na_drop) {
-      x <- x[!is.na(x)]
-    }
-    res <- ifelse(x %in% c(1, 7, 12, 19, 20, 23, 33, 37, 52, 55, 56,
-                           58, 61, 64, 65, 66, 73, 97) * 10,
-                  sprintf("C%02d", floor(x / 10)),
-                  ifelse(x < 100,
-                         sprintf("C0%.1f", x / 10),
-                         sprintf("C%.1f", x / 10)))
-  } else if (init == "D") {
-    x <- ifelse(x %in% not_icd10$D | x > 488, NA, x)
-    if (na_drop) {
-      x <- x[!is.na(x)]
-    }
-    res <- ifelse(x %in% (c(24, 27, 34, 45) * 10),
-      sprintf("D%02d", floor(x / 10)),
-      ifelse(x < 100, sprintf("D0%.1f", x / 10),
-        sprintf("D%.1f", x / 10)
-      )
-    )
+range_check <- function(x) {
+  init <- toupper(substring(x, 1, 1))
+  icdn <- as.numeric(gsub("[^0-9\\.]", "", x))
+  if (init == "D") {
+    ress <- gen_icd10((icdn * 10), "D", na_drop = FALSE)
+  } else if (init == "C") {
+    ress <- gen_icd10((icdn * 10), na_drop = FALSE)
   }
-  return(res)
+  check <- !(ress == x)
+  check <- ifelse(is.na(check), TRUE, FALSE)
+  return(check)
 }

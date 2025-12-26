@@ -4,7 +4,43 @@ library(magick)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-# Convert the bitmap to a 'magick-image' object
+library(ggwordcloud)
+set.seed(160)
+morp <- sample(gen_morp(8000:9993), 70, replace = TRUE)
+topo <- sample(gen_topo(150:349), 50, replace = TRUE)
+beha <- sample(c(1:9), 10, replace = TRUE)
+char <- sample(c("registr", "sex", "topo", "morp", "beha",
+                 "grad", "inciden", "birthda", "ICD10"), 20, replace = TRUE)
+
+data2 <- data.frame(data= c(morp, topo, beha)) |> 
+  count(data) |> 
+  arrange(desc(n))
+pp <- ggwordcloud2(data2, color = "random-dark", size = 1,
+                   shape = "round") 
+sticker(
+  pp,
+  s_x = 1,
+  s_y = 0.8,
+  s_width = 1.3,
+  s_height = 1.3,
+  package = "crcheck",
+  p_y = 1.4,
+  p_size = 63,
+  p_color = "#00b301",
+  p_family = "sans",
+  p_fontface = "bold",
+  h_size = 0.3,
+  h_color = "#0f1e1d", 
+  h_fill = "#c1d1cf",
+  filename = "logo.png",
+  asp = 1,
+  dpi = 600
+)
+
+use_logo("logo.png")
+
+file.remove("logo.png")
+
 pcs <- image_read("~/website/db/images/icon/dot.svg")
 image <- image_fill(pcs, "none")
 raster <- as.raster(image)
@@ -52,24 +88,3 @@ pp <- ggplot(df, aes(x = factor(x), y = y)) +
   coord_fixed(ratio = 0.3) +
   theme(legend.position = "none")
 
-sticker(
-  pp,
-  s_x = 1,
-  s_y = 0.8,
-  s_width = 1.2,
-  s_height = 1,
-  package = "crcheck",
-  p_y = 1.4,
-  p_size = 50,
-  p_color = "#27514c",
-  p_family = "sans",
-  p_fontface = "bold",
-  h_size = 0.3,
-  h_color = "#0f1e1d",
-  h_fill = "#c1d1cf",
-  filename = "logo.png",
-  asp = 1,
-  dpi = 600
-)
-
-use_logo("logo.png")

@@ -4,20 +4,42 @@
 \alias{check_sex_morp}
 \title{Check consistency between sex and morphology code}
 \usage{
-check_sex_morp(sex = c(1, 2), morp = c(8905, 8080))
+check_sex_morp(sex, morp, std = "iacr", quiet = FALSE)
 }
 \arguments{
-\item{sex}{sex code}
+\item{sex}{A character vector indicating the sex of the cancer cases,
+where \code{"1"} represents male and \code{"2"} represents female.}
 
-\item{morp}{morphology code}
+\item{morp}{A character vector containing the morphology part of ICD-O-3
+codes (e.g., "8000" or \code{c("8000", "8070", "8140")}).}
+
+\item{std}{A character string indicating the standard to use.
+Options are "iarc" (default) or "encr".}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-class of 'check'
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
 Check consistency between sex and morphology code
 }
 \examples{
 sex <- c(1, 2, 1, 1)
-morp <- c(8905, 8080, 9000, 9300)
+morp <- c(8950, 9061, 8600, 9300)
+res <- check_sex_morp(sex, morp)
+print(res)
 }

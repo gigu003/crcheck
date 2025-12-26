@@ -1,4 +1,12 @@
 url: ~
 template:
-  bootstrap: 5
-
+  bootstrap: 3
+  components:
+    twitter:
+      icon: fa-twitter
+      href: http://twitter.com/Qiong_Chen88
+      aria-label: Twitter
+    github:
+      icon: fa-github
+      href: https://github.com/gigu003/crcheck
+      aria-label: github

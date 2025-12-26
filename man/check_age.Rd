@@ -2,26 +2,36 @@
 % Please edit documentation in R/check_age.R
 \name{check_age}
 \alias{check_age}
-\title{Check consistency between age and dates.}
+\title{Check the validation of age}
 \usage{
-check_age(age, birth_date = NULL, onset_date = NULL)
+check_age(age, quiet = FALSE)
 }
 \arguments{
-\item{age}{Age.}
+\item{age}{An integer vector indicating the ages of the cancer cases.}
 
-\item{birth_date}{Birth date of cancer case.}
-
-\item{onset_date}{Incidence date of cancer.}
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-Class of 'check'.
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
-Check consistency between age and dates.
+Check the validation of age
 }
 \examples{
-age <- c(58, 59, 60)
-birth <- c("1960-08-24", "1956-09-24", "1971-06-30")
-onset <- c("2024-09-10", "2024-08-10", "2023-09-11")
-check_age(age, birth, onset)
+age <- c(0, 1, 135, NA)
+res <- check_age(age)
+print(res)
 }

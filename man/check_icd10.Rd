@@ -4,19 +4,34 @@
 \alias{check_icd10}
 \title{Check the ICD10 code in the tumor part.}
 \usage{
-check_icd10(icd10)
+check_icd10(icd10, quiet = TRUE)
 }
 \arguments{
-\item{icd10}{The ICD10 codes.}
+\item{icd10}{A character vector containing the ICD10 codes (e.g., \code{c("C22.9", "C22.0", "C16.0", "C15.2", "C15.9")}).}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-check_icd10 returns an object of class of 'check'.
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
 Check the ICD10 code in the tumor part.
 }
 \examples{
-
-icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2")
+icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2", "c15.2")
 res <- check_icd10(icd10)
+print(res)
 }

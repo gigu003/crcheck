@@ -2,20 +2,40 @@
 % Please edit documentation in R/check_sex.R
 \name{check_sex}
 \alias{check_sex}
-\title{Check validation of sex code}
+\title{Verify character vector comply with gender coding rules}
 \usage{
-check_sex(sex)
+check_sex(sex, quiet = FALSE)
 }
 \arguments{
-\item{sex}{sex code}
+\item{sex}{A character vector indicating the sex of the cancer cases,
+where \code{"1"} represents male and \code{"2"} represents female.}
+
+\item{quiet}{Logical. If TRUE, suppresses output messages.}
 }
 \value{
-class of 'check'
+A list object of class \code{check} with the following elements:
+\itemize{
+\item \code{check_item}: A character string indicating the item or combination of
+items being checked.
+\item \code{check_standard}: A character string specifying the standard used.
+\item \code{check_version}: A character string specifying the version of the standard.
+\item \code{data}: A list containing the input data.
+\item \code{check}: A logical vector indicating whether each code passed the checks.
+\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
+\code{2} for Warning, \code{3} for Error.
+\item \code{error_code}: A character vector containing error or warning codes.
+\item \code{error_desc}: A character vector containing descriptive messages for each
+error or warning.
+}
 }
 \description{
-Check validation of sex code
+Checks whether input values for sex comply with standard coding rules used
+in tumor registry data. The function verifies format, detects missing or
+invalid entries, and ensures values fall within the accepted range defined
+by IARC (e.g., 1 for male, 2 for female, 3 for other/unknown).
 }
 \examples{
 sex <- c(1, 2, 3, 1, 2)
-check_sex(sex)
+res <- check_sex(sex)
+print(res)
 }
