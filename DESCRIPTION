@@ -13,6 +13,7 @@ Description: Perform internal consistency checks on individual variables or
       / the International Association of Cancer Registries (IACR).
 License: MIT + file LICENSE
 Encoding: UTF-8
+Date: 2025-01-01
 URL: https://github.com/gigu003/crcheck
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
