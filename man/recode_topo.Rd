@@ -4,10 +4,19 @@
 \alias{recode_topo}
 \title{Recode the topography code in a string}
 \usage{
-recode_topo(x)
+recode_topo(x, sep = ",", simplify = TRUE, sort_result = FALSE)
 }
 \arguments{
 \item{x}{A string contains topography code}
+
+\item{sep}{A character string used to split multiple expressions
+within each element of \code{x}. Default is ",".}
+
+\item{simplify}{Logical; if \code{TRUE} and \code{x} has length 1, return a
+simplified integer vector instead of a list. Default is \code{TRUE}.}
+
+\item{sort_result}{Logical; if \code{TRUE}, results are sorted. If \code{FALSE},
+unique values are returned while preserving input order.}
 }
 \value{
 Vector

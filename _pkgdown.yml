@@ -1,4 +1,4 @@
-url: ~
+url: https://gigu003.github.io/crcheck/
 template:
   bootstrap: 3
   components:
@@ -10,3 +10,12 @@ template:
       icon: fa-github
       href: https://github.com/gigu003/crcheck
       aria-label: github
+reference:
+- title: Functions
+  contents:
+  - matches(".*")
+articles:
+- title: Guides
+  contents:
+  - quality-checking-workflow
+  - migration-to-0.1.0

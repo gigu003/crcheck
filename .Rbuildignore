@@ -8,3 +8,7 @@
 ^\.github$
 ^README\.Rmd$
 ^man-roxygen$
+^\.positai$
+^\.claude$
+^\.clinerules$
+^AGENTS\.md$

@@ -4,12 +4,15 @@
 \alias{gen_topo}
 \title{Generate valid ICDO3 topography codes.}
 \usage{
-gen_topo(x, na_drop = TRUE)
+gen_topo(x = NULL, na_drop = TRUE, morp = NULL)
 }
 \arguments{
 \item{x}{Number between 0 and 809}
 
 \item{na_drop}{Logical value indicates whether drop NA values or not.}
+
+\item{morp}{Optional vector of morphology codes. If provided, only return topography
+codes that are suggested by the given morphology codes. Default is \code{NULL}.}
 }
 \value{
 A vector of valid ICDO3 topography codes.

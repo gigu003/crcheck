@@ -2,36 +2,56 @@
 % Please edit documentation in R/check_icd10.R
 \name{check_icd10}
 \alias{check_icd10}
-\title{Check the ICD10 code in the tumor part.}
+\title{Check ICD-10 consistency with ICD-O-3 codes}
 \usage{
-check_icd10(icd10, quiet = TRUE)
+check_icd10(topo, morp, beha, icd10, quiet = FALSE)
 }
 \arguments{
+\item{topo}{A character vector containing the topography part of ICD-O-3
+codes (e.g., "C50.9").}
+
+\item{morp}{A character vector containing the morphology part of ICD-O-3
+codes (e.g., "8000" or \code{c("8000", "8070", "8140")}).}
+
+\item{beha}{A character vector containing the behavior codes of the ICD-O-3
+codes, (e.g., "3" or \code{c("1", "2", "5")}).}
+
 \item{icd10}{A character vector containing the ICD10 codes (e.g., \code{c("C22.9", "C22.0", "C16.0", "C15.2", "C15.9")}).}
 
-\item{quiet}{Logical. If TRUE, suppresses output messages.}
+\item{quiet}{Logical. A single \code{TRUE} or \code{FALSE} value. If \code{TRUE}, suppresses
+the printed summary of check results.}
 }
 \value{
 A list object of class \code{check} with the following elements:
 \itemize{
-\item \code{check_item}: A character string indicating the item or combination of
-items being checked.
-\item \code{check_standard}: A character string specifying the standard used.
-\item \code{check_version}: A character string specifying the version of the standard.
-\item \code{data}: A list containing the input data.
-\item \code{check}: A logical vector indicating whether each code passed the checks.
-\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
-\code{2} for Warning, \code{3} for Error.
-\item \code{error_code}: A character vector containing error or warning codes.
-\item \code{error_desc}: A character vector containing descriptive messages for each
-error or warning.
+\item \code{check_item}: A character vector indicating the item or item combination
+being checked.
+\item \code{check}: An integer vector giving the positions of records with warnings or
+errors.
+\item \code{data}: A character vector containing the checked values for records with
+warnings or errors.
+\item \code{type}: A character vector of warning or error codes.
+\item \code{group}: A character vector of rule group identifiers.
 }
+
+Printing a \code{check} object returns a data frame with columns \code{id}, \code{item},
+\code{value}, \code{type}, and \code{group}.
 }
 \description{
-Check the ICD10 code in the tumor part.
+Checks whether an existing ICD-10 code is consistent with the ICD-10 code
+converted from ICD-O-3 topography, morphology and behaviour codes.
+}
+\details{
+Inputs are standardized before comparison. Records are reported only when
+both the existing ICD-10 code and the converted ICD-10 code are available
+and differ. Missing, invalid or unmatched values are left to the relevant
+single-item checks.
 }
 \examples{
-icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2", "c15.2")
-res <- check_icd10(icd10)
+topo <- c("C50.9", "C18.0")
+morp <- c(8500, 8000)
+beha <- c(3, 0)
+icd10 <- c("C34.9", "D12.0")
+res <- check_icd10(topo, morp, beha, icd10)
 print(res)
 }

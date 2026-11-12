@@ -4,10 +4,22 @@
 \alias{recode_morp}
 \title{Recode the morphology code in a string}
 \usage{
-recode_morp(x)
+recode_morp(x, sep = ",", ignore = "M", simplify = TRUE, sort_result = FALSE)
 }
 \arguments{
 \item{x}{A string contains morphology code}
+
+\item{sep}{A character string used to split multiple expressions
+within each element of \code{x}. Default is ",".}
+
+\item{ignore}{Character vector of symbols to remove prior to parsing
+(e.g. c("M", "m")).}
+
+\item{simplify}{Logical; if \code{TRUE} and \code{x} has length 1, return a
+simplified integer vector instead of a list. Default is \code{TRUE}.}
+
+\item{sort_result}{Logical; if \code{TRUE}, results are sorted. If \code{FALSE},
+unique values are returned while preserving input order.}
 }
 \value{
 Vector

@@ -9,8 +9,6 @@ A list object of class \code{check} containing:
 \item \code{check_item}: Character contains item or items combination
 being checked.
 \item \code{check_standard}: Character contains the standard used
-\item \code{check_version}:  Character contains the version of the
-standard used.
 \item \code{data}: A list contains the input data.
 \item \code{check}: A logical vector indicating whether each code passed
 the checks.

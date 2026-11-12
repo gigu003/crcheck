@@ -5,13 +5,51 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/gigu003/iarccheck/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gigu003/iarccheck/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/gigu003/crcheck/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gigu003/crcheck/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-`crcheck` aims to performs internal consistency check on data items or
-their combinations in compliance with the guidelines outlined in the
-IARC Technical Report No. 42, issued by IARC/IACR, or the JRC Technical
-Report (updated May 2024), published by ENCR.
+`crcheck` provides tools for checking the validity and internal
+consistency of individual tumour records in population-based cancer
+registry data. It focuses on common registry variables and clinically
+meaningful item combinations, using rule sets derived from IARC/IACR
+Technical Report No. 42, IARC/IACR multiple primary rules, ENCR/JRC
+quality-check resources, and registry field specifications.
+
+The package is designed for routine cancer registry quality-control
+workflows: prepare a case-level data frame, run single-item and
+multi-item checks, review the returned issue list, and feed the results
+back into registry data cleaning. Core checks use base R where
+practical; duplicate-person linkage uses specialized probabilistic and
+string-comparison dependencies for scale and reproducibility.
+
+## What can be checked?
+
+| Area | Main functions | Typical variables |
+|----|----|----|
+| Single-item value ranges | `check_single_item()` | `id`, `sex`, `age`, `topo`, `morp`, `beha`, `grad`, `basi`, `icd10` |
+| Date logic | `check_age_birth_inci()`, `check_birth_inci_last()`, `check_followup()` | `birthda`, `inciden`, `deathda`, `lastcontact`, `status` |
+| Topography and morphology | `check_topo_morp()` | `topo`, `morp` |
+| Age, topography, and morphology | `check_age_topo_morp()` | `age`, `topo`, `morp` |
+| Sex, topography, and morphology | `check_sex_topo_morp()` | `sex`, `topo`, `morp` |
+| Behaviour, grade, morphology, topography, and basis of diagnosis | `check_beha_topo()`, `check_grad_morp_beha()`, `check_grad_topo_morp_beha()`, `check_basi_morp()` | `beha`, `grad`, `morp`, `topo`, `basi` |
+| Possible multiple primary cancers | `check_multiple_primary()` | `id`, `topo`, `morp`, `inciden` |
+| Data-frame level quality checks | `cr_check()` | a cancer registry data frame |
+| Duplicate-person identification | `check_duplicate_person()` | `id`, `name`, `sex`, `birthda`, optional address and phone |
+
+## Recommended input fields
+
+`cr_check()` works with ordinary data frames. It detects supported
+variables by name and matches column names case-insensitively. Commonly
+used fields include:
+
+``` text
+id, registr, sex, age, birthda, inciden, topo, morp, beha, grad, basi,
+icd10, deathda, lastcontact, status
+```
+
+If `age` is absent but both `birthda` and `inciden` are available,
+`cr_check()` calculates age internally for age-related consistency
+checks.
 
 ## Installation
 
@@ -23,7 +61,221 @@ You can install the development version of ‘crcheck’ from
 devtools::install_github("gigu003/crcheck")
 ```
 
-## Example
+## Examples
 
-The package could conduct a comprehensive check procedure on items or
-item combinations.
+### Check a single item
+
+Use `check_single_item()` to validate one variable against the package’s
+value-range rules.
+
+``` r
+library(crcheck)
+
+sex <- c("1", "2", "9", "")
+res <- check_single_item(sex, var_name = "sex", allow_missing = FALSE, quiet = TRUE)
+print(res)
+#>   id item value    type group
+#> 1  4  sex        E-MISS  G-02
+#> 2  3  sex     9 E-RANGE  G-02
+```
+
+### Check an item combination
+
+Use item-combination functions when the validity of one variable depends
+on another variable. For example, `check_topo_morp()` checks topography
+and morphology combinations.
+
+``` r
+topo <- c("C15.1", "C06.9", "C16.2", "C34.9")
+morp <- c(8140, 8500, 8500, 8600)
+
+res <- check_topo_morp(topo, morp, quiet = TRUE)
+print(res)
+#>   id      item      value   type group
+#> 1  4 Topo/Morp C34.9/8600 W-TOMO  G-25
+#> 2  3 Topo/Morp C16.2/8500 W-TOMO  G-58
+```
+
+### Run comprehensive checks on a data frame
+
+Use `cr_check()` to run available single-item and multi-item checks on a
+cancer registry data frame. Column names are matched case-insensitively
+for supported variables.
+
+``` r
+df <- data.frame(
+  id = c("410102198001011234", "410102198001011235"),
+  sex = c(1, 2),
+  birthda = c("1980-01-01", "1980-01-01"),
+  inciden = c("2020-01-01", "2019-12-31"),
+  topo = c("C61.9", "C50.9"),
+  morp = c(8140, 8500),
+  beha = c(3, 3),
+  grad = c(1, 2),
+  basi = c(7, 7),
+  stringsAsFactors = FALSE
+)
+
+cr_check(df, quiet = TRUE)
+#>                   id item              value          type group
+#> 1 410102198001011234   id 410102198001011234 E-ID-LastChar  G-01
+#> 2 410102198001011235   id 410102198001011235 E-ID-LastChar  G-01
+```
+
+### Detect possible multiple primary cancers
+
+Use `check_multiple_primary()` when a patient has more than one tumour
+record. The function compares tumour pairs within each patient according
+to the IARC/IACR 2004 rules for multiple primary cancers.
+
+``` r
+mp_data <- data.frame(
+  id = c("P1", "P1", "P2", "P2"),
+  topo = c("C18.0", "C34.9", "C50.9", "C50.9"),
+  morp = c(8140, 8140, 8140, 8070),
+  inciden = c("2020-01-01", "2021-03-15", "2019-05-01", "2020-06-01"),
+  stringsAsFactors = FALSE
+)
+
+check_multiple_primary(mp_data, inciden = "inciden", quiet = TRUE)
+#>   id row_1 row_2 topo_1 topo_2 morp_1 morp_2 topo_group_1 topo_group_2
+#> 1 P1     1     2  C18.0  C34.9   8140   8140          C18         T-06
+#> 2 P2     3     4  C50.9  C50.9   8140   8070          C50          C50
+#>   morp_group_1 morp_group_2    rule
+#> 1         M-03         M-03   MP-R3
+#> 2         M-03         M-01 MP-R4.2
+#>                                                          reason
+#> 1   Different primary sites after applying Table 1 site groups.
+#> 2 Same primary site but different morphology groups in Table 2.
+```
+
+### Identify records belonging to the same person
+
+Use `check_duplicate_person()` before checking multiple primaries when a
+person may have two, three, or more registry records. It returns strict
+duplicate groups together with the pair-level probabilities and field
+evidence used to form them.
+
+``` r
+person_data <- data.frame(
+  record = paste0("R", 1:4),
+  id = rep("11010519491231002X", 4),
+  name = rep("张三", 4),
+  sex = rep(1, 4),
+  birthda = rep("1949-12-31", 4),
+  stringsAsFactors = FALSE
+)
+
+duplicates <- check_duplicate_person(
+  person_data,
+  record_id = "record",
+  quiet = TRUE
+)
+duplicates$groups
+#>   duplicate_group group_size row record_id                 id name sex
+#> 1        DP000001          4   1        R1 11010519491231002X 张三   1
+#> 2        DP000001          4   2        R2 11010519491231002X 张三   1
+#> 3        DP000001          4   3        R3 11010519491231002X 张三   1
+#> 4        DP000001          4   4        R4 11010519491231002X 张三   1
+#>      birthda minimum_pair_probability group_decision
+#> 1 1949-12-31                        1    same_person
+#> 2 1949-12-31                        1    same_person
+#> 3 1949-12-31                        1    same_person
+#> 4 1949-12-31                        1    same_person
+duplicates$pairs[, c(
+  "row_1",
+  "row_2",
+  "duplicate_probability",
+  "decision"
+)]
+#>   row_1 row_2 duplicate_probability    decision
+#> 1     1     2                     1 same_person
+#> 2     1     3                     1 same_person
+#> 3     1     4                     1 same_person
+#> 4     2     3                     1 same_person
+#> 5     2     4                     1 same_person
+#> 6     3     4                     1 same_person
+```
+
+The function does not use transitive chaining: every pair of records
+within a group must reach the matching threshold. Probabilities produced
+without labelled training data are model estimates conditional on
+candidate generation and should be reviewed before records are merged.
+
+### Inspect rule groups
+
+Use `show_rules()` to inspect selected internal rule groups. For
+example, `"tomo"` shows topography-morphology rules and `"mult_morp"`
+shows morphology groups used by the multiple-primary check.
+
+``` r
+suppressWarnings(head(show_rules("tomo"), 3))
+#>    group
+#> f1  G-01
+#> f2  G-02
+#> f3  G-03
+#>                                                                                                                                                             morp
+#> f1 8000-8003, 9590-9596, 9650-9678, 9680-9687, 9690-9699, 9701-9705, 9714, 9716, 9719, 9727-9731, 9740, 9741, 9750-9758, 9760, 9762, 9766-9769, 9930, 9970, 9975
+#> f2                                                                                                                                                    8561, 8974
+#> f3                                                                                                                                                    8142, 8214
+#>        topo
+#> f1  C00-C80
+#> f2 C07, C08
+#> f3      C16
+show_rules("mult_morp")[1:3, c("group", "label", "morp")]
+#>   group                                    label
+#> 1  M-01 Squamous and transitional cell carcinoma
+#> 2  M-02                    Basal cell carcinomas
+#> 3  M-03                          Adenocarcinomas
+#>                                                                           morp
+#> 1                                                         8051-8084, 8120-8131
+#> 2                                                                    8090-8110
+#> 3 8140-8149, 8160-8162, 8190-8221, 8260-8337, 8350-8551, 8570-8576, 8940, 8941
+```
+
+## Output format
+
+The printed result is a data frame with the following columns:
+
+- `id`: record identifier or row position;
+- `item`: checked item or item combination;
+- `value`: value that triggered the warning or error;
+- `type`: warning or error code;
+- `group`: rule group identifier.
+
+In general, `type` values beginning with `E-` indicate errors or invalid
+values, whereas values beginning with `W-` indicate warnings or
+clinically unusual combinations that should be reviewed. `group`
+identifies the corresponding internal rule group; use `show_rules()` to
+inspect rule definitions where available.
+
+`check_multiple_primary()` returns a pair-level data frame because
+possible multiple primary cancers are assessed by comparing tumour
+records within the same patient. Its output includes the patient
+identifier, row indices, compared topography and morphology values,
+mapped rule groups, rule code, and reason.
+
+## Migration to crcheck 0.1.0
+
+Version 0.1.0 consolidates the public API introduced during the package
+redesign. Legacy single-item checks now use `check_single_item()`, rule
+display helpers now use `show_rules()`, and several combined checks have
+new interfaces and result structures. These are intentional breaking
+changes; legacy function names are not retained as aliases.
+
+See the [migration guide](vignettes/migration-to-0.1.0.Rmd) for the
+complete mapping and the behavior changes that may affect existing
+workflows.
+
+## Development status and roadmap
+
+The current version keeps the main `cr_check()` output compact for
+compatibility with existing workflows. Planned improvements include
+optional correction suggestions and more configurable `cr_check()`
+modules.
+
+## Notes
+
+Internal dictionaries are rebuilt from the maintained generation scripts
+in `data-raw/`. Check objects contain only the fields required to
+represent the validation result.

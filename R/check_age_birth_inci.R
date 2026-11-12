@@ -4,7 +4,7 @@
 #' @template birthda
 #' @template inciden
 #' @template quiet
-#' 
+#'
 #' @template return
 #' @export
 #'
@@ -14,61 +14,68 @@
 #' onset <- c("2024-09-10", "2024-08-10", "2023-09-11")
 #' res <- check_age_birth_inci(age, birth, onset)
 #' print(res)
-check_age_birth_inci <- function(age,
-                                 birthda = NULL,
-                                 inciden = NULL,
-                                 quiet = FALSE) {
-  miss_valid <- is.na(age) | is.na(birthda) | is.na(inciden)
-  range_valid <- age > 105 | age < 0
-  form_valid <- rep(!is.numeric(age), length(age))
-  age_cal <- calc_age(birthda, inciden)
-  check1 <- ifelse(!miss_valid, abs(age - age_cal) > 1, FALSE)
-  #generate result data
-  data <- list(age = age, birthda = birthda, inciden = inciden)
-  check <- !Reduce('|', list(miss_valid, form_valid, range_valid, check1))
-  type <- ifelse(check, 1, 3)
-  error_code <- ifelse(miss_valid, "E-AGEC",
-                       ifelse(form_valid, "E-FORM",
-                              ifelse(range_valid, "E-OUTR",
-                                     ifelse(check1, "E-AGED", "C")))
+check_age_birth_inci <- function(
+  age,
+  birthda = NULL,
+  inciden = NULL,
+  quiet = FALSE
+) {
+  check_equal_length(
+    age,
+    birthda,
+    inciden,
+    arg_names = c("age", "birthda", "inciden")
   )
-  error_desc <- ifelse(miss_valid, 101,
-                       ifelse(form_valid, 102,
-                              ifelse(range_valid, 103,
-                                     ifelse(check1, 104, 0))))
-  #output result
-  res <- list()
-  class(res) <- c("check", "age/birthda/inciden")
-  res$check_item <- "Age/Birthda/Inciden"
-  res$check_standard <- "encr"
-  res$check_version <- "IARC Check Rules 2005"
-  res$data <- data
-  res$check <- check
-  res$type <- type
-  res$error_code <- error_code
-  res$error_desc <- error_desc
-  
+
+  age_chr <- trimws(as.character(age))
+  age_chr[age_chr %in% c("", "NULL", "NA")] <- NA_character_
+  age_num <- suppressWarnings(as.numeric(age_chr))
+  birthda_date <- parse_registry_date(birthda, arg = "birthda")
+  inciden_date <- parse_registry_date(inciden, arg = "inciden")
+
+  result <- lapply(1:2, function(i) {
+    if (i == 1) {
+      res <- is.na(age_num) | is.na(birthda_date) | is.na(inciden_date)
+    } else if (i == 2) {
+      age_cal <- calc_registry_age(birthda_date, inciden_date)
+      miss_valid <- is.na(age_num) | is.na(birthda_date) | is.na(inciden_date)
+      res <- ifelse(!miss_valid, abs(age_num - age_cal) > 1, FALSE)
+    }
+    return(res)
+  })
+
+  loc_age_birth_inci <- lapply(result, which)
+  check <- unique(unlist(loc_age_birth_inci))
+  groups <- character(length(check))
+  values <- character(length(check))
+  for (i in 1:2) {
+    pos <- loc_age_birth_inci[[i]]
+    idx <- match(pos, check)
+    idx <- idx[!is.na(idx)]
+    if (length(idx) == 0) {
+      next
+    }
+    groups[idx] <- paste0(
+      ifelse(groups[idx] == "", "G-", paste0(groups[idx], "/")),
+      sprintf("%02d", i)
+    )
+    values[idx] <- paste0(age[pos], "/", birthda[pos], "/", inciden[pos])
+  }
+
+  # Construct the result
+  res <- structure(
+    list(
+      check_item = "Age/Birthda/Inciden",
+      check = check,
+      data = values,
+      type = "E-AGED",
+      group = groups
+    ),
+    class = c("check", "age/birthda/inciden")
+  )
+
   if (!quiet) {
-    summary(res)  
+    summary(res)
   }
   invisible(res)
-}
-
-calc_age <- function(start, end) {
-  start <- as.Date(start)
-  end <- as.Date(end)
-  age <- rep(NA, length(start))
-  v_dates <- !is.na(start) & !is.na(end)
-  # Extract year, month, and day components for valid indices
-  syear <- as.numeric(format(start[v_dates], "%Y"))
-  eyear <- as.numeric(format(end[v_dates], "%Y"))
-  smonth <- as.numeric(format(start[v_dates], "%m"))
-  emonth <- as.numeric(format(end[v_dates], "%m"))
-  sday <- as.numeric(format(start[v_dates], "%d"))
-  eday <- as.numeric(format(end[v_dates], "%d"))
-  # Calculate initial age for valid dates
-  age[v_dates] <- eyear - syear
-  adjustment <- (emonth < smonth) | (emonth == smonth & eday < sday)
-  age[v_dates][adjustment] <- age[v_dates][adjustment] - 1
-  return(age)
 }

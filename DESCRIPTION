@@ -1,22 +1,34 @@
 Package: crcheck
 Title: Checking the Validity and Internal Consistency
-Version: 0.0.1
+Version: 0.1.0.9000
+Date: 2024-07-01
 Authors@R: 
     person("Qiong", "Chen", , "chenq08@126.com", role = c("aut", "cre", "cph"),
-           comment = c(ORCID = "0000-0003-2401-0046",
-           affiliation = "Department of Cancer Epidemiology, The Affiliated
-           Cancer Hospital of Zhengzhou University & Henan Cancer Hospital,
-           Henan Cancer Registry in China"))
-Description: Perform internal consistency checks on individual variables or
-      combinations of variables collected in cancer registries, in accordance
-      with the rules of the International Agency for Research on Cancer (IARC)
-      / the International Association of Cancer Registries (IACR).
+           comment = c(ORCID = "0000-0003-2401-0046", affiliation = "Department of Cancer Epidemiology, The Affiliated\n           Cancer Hospital of Zhengzhou University & Henan Cancer Hospital,\n           Henan Cancer Registry in China"))
+Description: Perform internal consistency checks on individual variable or
+    combinations of variables collected in cancer registries, in
+    accordance with the rules of the International Agency for Research on
+    Cancer (IARC) / the International Association of Cancer Registries
+    (IACR).
 License: MIT + file LICENSE
-Encoding: UTF-8
-Date: 2025-01-01
-URL: https://github.com/gigu003/crcheck
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+URL: https://github.com/gigu003/crcheck,
+    https://gigu003.github.io/crcheck/
+BugReports: https://github.com/gigu003/crcheck/issues
 Depends: 
     R (>= 4.4.0)
+Imports:
+    data.table,
+    parallel,
+    reclin2,
+    stringdist
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    tibble
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
+Config/testthat/edition: 3
+Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)

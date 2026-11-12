@@ -1,0 +1,96 @@
+---
+title: "Migration to crcheck 0.1.0"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Migration to crcheck 0.1.0}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Version 0.1.0 completes a redesign of the package interface and result format.
+It intentionally removes legacy exported names instead of providing aliases
+whose results would differ from the original functions. Update calls and any
+code that consumes check results before adopting this release.
+
+## Single-item checks
+
+The individual functions listed below are replaced by
+`check_single_item(x, var_name, quiet = FALSE)`.
+
+| Removed function | Replacement `var_name` |
+|---|---|
+| `check_age()` | `"age"` |
+| `check_basi()` | `"basi"` |
+| `check_beha()` | `"beha"` |
+| `check_grad()` | `"grad"` |
+| `check_id()` | `"id"` |
+| `check_morp()` | `"morp"` |
+| `check_occu()` | `"occu"` |
+| `check_sex()` | `"sex"` |
+| `check_topo()` | `"topo"` |
+| `check_trib()` | `"trib"` |
+
+For example, replace `check_sex(x)` with:
+
+```{r single-item}
+library(crcheck)
+check_single_item(c(1, 2, 9), var_name = "sex", quiet = TRUE)
+```
+
+The new result records failing row positions and standardized `type` and
+`group` values. Code that used the legacy `error_code` or `error_desc` fields
+must instead use the printed five-column result or the current `check` fields.
+
+## Combined checks
+
+Combined checks now expose the variables required by the current rule modules.
+Argument order and output structure are not backward compatible.
+
+| Removed function | Current interface | Migration note |
+|---|---|---|
+| `check_morp_beha()` | `check_grad_morp_beha()` | Requires grade and also evaluates grade rules. |
+| `check_morp_grad()` | `check_grad_morp_beha()` | Requires behaviour; arguments are ordered grade, morphology, behaviour. |
+| `check_sex_morp()` | `check_sex_topo_morp()` | Requires topography and evaluates both sex-site and sex-morphology rules. |
+| `check_sex_topo()` | `check_sex_topo_morp()` | Requires morphology and evaluates both sex-site and sex-morphology rules. |
+| `check_topo_morp_beha_grad()` | `check_grad_topo_morp_beha()` | Renamed; grade is now the first argument. |
+
+There is no exact standalone replacement for the removed two-field combined
+checks. Do not supply invented placeholder fields merely to reproduce an old
+call. Use the current combined function only when all required registry fields
+are available.
+
+## Rule displays
+
+Legacy display helpers are replaced by `show_rules(type)`.
+
+| Removed function | Replacement |
+|---|---|
+| `show_age_topo_morp()` | `show_rules("agmt")` |
+| `show_grad_morp()` | `show_rules("mogr")` |
+| `show_morp_beha()` | `show_rules("mobe")` |
+| `show_sex_morp()` | `show_rules("semo")` |
+| `show_sex_topo()` | `show_rules("seto")` |
+| `show_topo_morp()` | `show_rules("tomo")` |
+
+`show_rules()` returns complete rule tables. Filter its `group` column when a
+legacy call previously selected one group or family.
+
+## ICD conversion
+
+Replace `ICDO3toICD10(topo, morp, beha)` with
+`icdo3_to_icd10(topo, morp, beha)`. The new function standardizes common input
+formats, preserves output length, and provides an `unmatched` argument.
+
+## Comprehensive workflows
+
+Prefer `cr_check()` for case-level data frames. It runs each current check whose
+required columns are present and returns the standardized columns `id`, `item`,
+`value`, `type`, and `group`. Review downstream code for assumptions about the
+legacy object fields before replacing an earlier package version.

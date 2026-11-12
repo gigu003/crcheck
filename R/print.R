@@ -7,13 +7,14 @@
 #' @export
 #'
 summary.check <- function(object, ...) {
-  cat("Check Items:", object$check_item, "\n")
-  cat("Check Standard:", object$check_standard, "\n")
-  cat("Standard Version:", object$check_version, "\n")
-  cat("Check Results:")
-  print(table(factor(object$type,
-                     levels = c(1:3),
-                     labels = c("Correct", "Warning", "Error"))))
+  cat("Check Results:\n")
+  errors <- length(object$group)
+  cat(errors, " Error or Warnings were found.\n")
+  if (errors != 0) {
+    res <- as.data.frame(table(object$group))
+    names(res) <- c("Group", "Count")
+    print(res)
+  }
   cat("\n")
 }
 
@@ -26,28 +27,30 @@ summary.check <- function(object, ...) {
 #' @export
 #'
 print.check <- function(x, ...) {
-  loc <- which(!x$check)
-  data <- lapply(x$data, function(x) x[loc])
-  if (length(data) == 1){
-    values <- data[[1]]
-  } else {
-    values <- do.call(rbind, data)
-    values <- apply(values, 2, paste, collapse="/")
+  if (length(x$check) == 0) {
+    return(data.frame(
+      id = character(0),
+      item = character(0),
+      value = character(0),
+      type = character(0),
+      group = character(0)
+    ))
   }
 
-  res <- data.frame(
-    id = loc,
-    item = rep(x$check_item, length(loc)),
-    value = values,
-    type = factor(x$type[loc],
-                  levels = c(1:3),
-                  labels = c("Correct", "Warning", "Error")),
-    error_code = x$error_code[loc],
-    error_desc = x$error_desc[loc]
-  )
-  return(res)
-}
+  check_item <- x$check_item
+  if (length(check_item) == 1) {
+    check_item <- rep(check_item, length(x$check))
+  }
+  type <- x$type
+  if (length(type) == 1) {
+    type <- rep(type, length(x$check))
+  }
 
-"%nin%" <- function(chrvelements, chrvset) {
-  !(chrvelements %in% chrvset)
+  data.frame(
+    id = x$check,
+    item = check_item,
+    value = x$data,
+    type = type,
+    group = x$group
+  )
 }

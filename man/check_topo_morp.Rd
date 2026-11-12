@@ -4,7 +4,7 @@
 \alias{check_topo_morp}
 \title{Check the combination of topography and morphology}
 \usage{
-check_topo_morp(topo, morp, std = "iacr", quiet = FALSE)
+check_topo_morp(topo, morp, quiet = FALSE)
 }
 \arguments{
 \item{topo}{A character vector containing the topography part of ICD-O-3
@@ -13,26 +13,24 @@ codes (e.g., "C50.9").}
 \item{morp}{A character vector containing the morphology part of ICD-O-3
 codes (e.g., "8000" or \code{c("8000", "8070", "8140")}).}
 
-\item{std}{A character string indicating the standard to use.
-Options are "iarc" (default) or "encr".}
-
-\item{quiet}{Logical. If TRUE, suppresses output messages.}
+\item{quiet}{Logical. A single \code{TRUE} or \code{FALSE} value. If \code{TRUE}, suppresses
+the printed summary of check results.}
 }
 \value{
 A list object of class \code{check} with the following elements:
 \itemize{
-\item \code{check_item}: A character string indicating the item or combination of
-items being checked.
-\item \code{check_standard}: A character string specifying the standard used.
-\item \code{check_version}: A character string specifying the version of the standard.
-\item \code{data}: A list containing the input data.
-\item \code{check}: A logical vector indicating whether each code passed the checks.
-\item \code{type}: A numeric vector categorizing validation results: \code{1} for correct,
-\code{2} for Warning, \code{3} for Error.
-\item \code{error_code}: A character vector containing error or warning codes.
-\item \code{error_desc}: A character vector containing descriptive messages for each
-error or warning.
+\item \code{check_item}: A character vector indicating the item or item combination
+being checked.
+\item \code{check}: An integer vector giving the positions of records with warnings or
+errors.
+\item \code{data}: A character vector containing the checked values for records with
+warnings or errors.
+\item \code{type}: A character vector of warning or error codes.
+\item \code{group}: A character vector of rule group identifiers.
 }
+
+Printing a \code{check} object returns a data frame with columns \code{id}, \code{item},
+\code{value}, \code{type}, and \code{group}.
 }
 \description{
 Validates combinations of topography (ICD-O-3 site) and morphology (ICD-O-3

@@ -4,7 +4,6 @@
 #' @template morp
 #' @template topo
 #' @template beha
-#' @template std
 #' @template quiet
 #'
 #' @template return
@@ -17,106 +16,144 @@
 #'  topo <- c("C15.2","C15.2", "C44.0", "C69.1", "C42.1", "C15.2", "C15.2")
 #'  res <- check_basi_morp(basi, morp, topo, beha)
 #'  print(res)
-check_basi_morp <- function(basi,
-                            morp,
-                            topo = NULL,
-                            beha = NULL,
-                            std = "iacr",
-                            quiet = FALSE) {
-  topo <- add_decimal(topo)
-  if (std == "iacr") {
-    morp_allowed <- c(8000, gen_morp(8150:8154), 8170, gen_morp(8270:8281),
-                      8800, 8960, 9100, 9140, 9380, 9384, 9500, 9510,
-                      gen_morp(9530:9539), 9590, 9732, 9761, 9800)
-    basi_logi <- basi %in% c(0, 1:4, 8, 9) & morp %nin% morp_allowed
-    #result <- lapply(1:2, function(x) {
-    #  basi %in% IARC_BasiMorpRule[[1]][[x]] &
-    #    !(morp %in% IARC_BasiMorpRule[[2]][[x]] &
-    #       topo %in% IARC_BasiMorpRule[[2]][[x]])
-    #})
-    #rr <- basi %in% c(5:7) & morp %in% (8000)
-    #res_matrix <- do.call(rbind, append(result, list(rr)))
-    #groups <- apply(res_matrix, 2, function(x) {
-    #  loc <- which(x == TRUE, arr.ind = TRUE)
-    #  paste(loc + 210, collapse = ",")
-    #})
-    #groups <- ifelse(is.na(groups)|groups=="", 0, groups)
-    #check <- !Reduce(`|`, append(list(rr), result))
-    check <- !basi_logi
-    groups <- ifelse(!check, 211, 0)
-    error_code <- ifelse(!check, "W-BDMO", "C")
-    error_desc <- groups
-  } else if (std == "encr") {
-    # define a function 
-    check_basi <- function(x, bs, rule = rule1) {
-      morp_list <- rule[[1]][[x]]
-      beha_list <- rule[[2]][[x]]
-      topo_list <- rule[[3]][[x]]
-      if (length(topo_list)==0) {topo_list <- gen_topo(0:809)}
-      morp_logi <- morp %in% morp_list
-      beha_logi <- beha %in% beha_list
-      topo_logi <- topo %nin% topo_list
-      basi == bs & morp_logi & beha_logi & topo_logi
-    }
-    # check allowed morphology code when basi code equals 0
-    basi0 <- basi == 0 & beha == 3 & morp %nin% unlist(ENCR_BasiMorpRule$basi0[[1]])
-    # check allowed morphology and behaviour code when basi equals 1
-    rule1 <- ENCR_BasiMorpRule[[2]]
-    rule1[[3]][[1]] <- gen_topo(0:809)
-    result <- lapply(1:5, check_basi, bs =1)
-    basi1 <- Reduce(`|`, result)
-    # check allowed morphology and behaviour code when basi equals 2
-    rule2 <- ENCR_BasiMorpRule[[3]]
-    rule2[[3]][[1]] <- gen_topo(0:809)
-    result <- lapply(1:65, check_basi, bs = 2, rule = rule2)
-    basi2 <- Reduce(`|`, result)
-    # check allowed morphology and behaviour code when basi equals 4
-    rule4 <- ENCR_BasiMorpRule[[4]]
-    result <- lapply(1:20, check_basi, bs = 4, rule = rule4)
-    basi4 <- Reduce(`|`, result)
-    # check allowed morphology and behaviour code when basi equals 5
-    morp_list <- ENCR_BasiMorpRule[[5]][[1]][[2]]
-    basi5 <- basi == 5 & beha == 3 & morp %in% morp_list
-    # check allowed morphology and behaviour code when basi equals 6
-    basi6 <- basi == 6 & beha %in% c(0, 1, 2)
-    # check allowed morphology and behaviour cocde when basi equals 7
-    morp_list <- ENCR_BasiMorpRule[[7]][[1]][[1]]
-    basi7 <- basi == 7 & beha == 3 & morp %in% morp_list
-    # check allowed morphology and behaviour cocde when basi equals 8
-    morp_list <- ENCR_BasiMorpRule[[8]]
-    basi8 <- basi == 8 & morp %nin% morp_list
-    
-    # generate output data
-    result <- list(basi0, basi1, basi2, basi4,
-                   basi5, basi6, basi7, basi8)
-    check <- !Reduce('|', result)
+check_basi_morp <- function(
+  basi,
+  morp,
+  topo = NULL,
+  beha = NULL,
+  quiet = FALSE
+) {
+  has_topo <- !is.null(topo)
+  has_beha <- !is.null(beha)
 
-    res_matrix <- do.call(rbind, result)
-    groups <- apply(res_matrix, 2, function(x) {
-      which(x == TRUE, arr.ind = TRUE)[1]
-    })
-    groups <- ifelse(is.na(groups), 0, groups + 240)
-    error_code <- ifelse(basi5|basi7|basi8, "W-BDMS",
-                         ifelse(basi0|basi1|basi2|basi4, "W-BDMO", "C"))
-    error_desc <- groups
+  if (is.null(topo)) {
+    topo <- rep(NA_character_, length(basi))
   }
-  data <- list(basi = basi, morp = morp, beha = beha, topo = topo)
-  type <- ifelse(check, 1, 2)
-  
+  if (is.null(beha)) {
+    beha <- rep(NA_integer_, length(basi))
+  }
+
+  check_equal_length(
+    basi,
+    morp,
+    topo,
+    beha,
+    arg_names = c("basi", "morp", "topo", "beha")
+  )
+  check_flag(quiet, "quiet")
+
+  basi <- as.integer(basi)
+  morp <- as.integer(gsub("[^0-9]", "", morp))
+  beha <- as.integer(beha)
+  topo <- add_decimal(topo)
+  topo <- gsub("[[:space:]]+", "", topo)
+  result1 <- lapply(1:2, function(i) {
+    if (i == 1) {
+      basi_morp <- basi %in%
+        IARC_BasiMorpRule[["basi"]][[i]] &
+        morp %nin% IARC_BasiMorpRule[["morp"]][[i]]
+    } else if (i == 2) {
+      basi_morp <- basi %in%
+        IARC_BasiMorpRule[["basi"]][[i]] &
+        morp %in% IARC_BasiMorpRule[["morp"]][[i]]
+      if (has_topo) {
+        basi_morp <- basi_morp & (topo %nin% IARC_BasiMorpRule[["topo"]][[i]])
+      }
+    }
+    basi_morp
+  })
+
+  # define a function
+  check_basi <- function(x, bs, rule = rule1) {
+    morp_list <- rule[[1]][[x]]
+    beha_list <- rule[[2]][[x]]
+    topo_list <- rule[[3]][[x]]
+    if (length(topo_list) == 0) {
+      topo_list <- gen_topo(0:809)
+    }
+    morp_logi <- morp %in% morp_list
+    beha_logi <- beha %in% beha_list
+    topo_logi <- if (has_topo) topo %nin% topo_list else rep(TRUE, length(basi))
+    basi == bs & morp_logi & beha_logi & topo_logi
+  }
+
+  # check allowed morphology code when basi code equals 0
+  basi0 <- basi == 0 &
+    beha == 3 &
+    morp %nin% unlist(ENCR_BasiMorpRule$basi0[[1]])
+
+  # check allowed morphology and behaviour code when basi equals 1
+  rule1 <- ENCR_BasiMorpRule[[2]]
+  rule1[[3]][[1]] <- gen_topo(0:809)
+  result <- lapply(1:5, check_basi, bs = 1)
+  basi1 <- Reduce(`|`, result)
+
+  # check allowed morphology and behaviour code when basi equals 2
+  rule2 <- ENCR_BasiMorpRule[[3]]
+  rule2[[3]][[1]] <- gen_topo(0:809)
+  result <- lapply(1:65, check_basi, bs = 2, rule = rule2)
+  basi2 <- Reduce(`|`, result)
+
+  # check allowed morphology and behaviour code when basi equals 4
+  rule4 <- ENCR_BasiMorpRule[[4]]
+  result <- lapply(1:20, check_basi, bs = 4, rule = rule4)
+  basi4 <- Reduce(`|`, result)
+
+  # check allowed morphology and behaviour code when basi equals 5
+  morp_list <- ENCR_BasiMorpRule[[5]][[1]][[2]]
+  basi5 <- basi == 5 & beha == 3 & morp %in% morp_list
+
+  # check allowed morphology and behaviour cocde when basi equals 7
+  morp_list <- ENCR_BasiMorpRule[[7]][[1]][[1]]
+  basi7 <- basi == 7 & beha == 3 & morp %in% morp_list
+
+  # check allowed morphology and behaviour cocde when basi equals 8
+  morp_list <- ENCR_BasiMorpRule[[8]]
+  basi8 <- basi == 8 & morp %nin% morp_list
+
+  #result2 <- list(basi0, basi1, basi2, basi4, basi5, basi7, basi8)
+  result2 <- list(basi0, basi1)
+  loc_basi_morp <- lapply(append(result1, result2), which)
+  check <- unique(unlist(loc_basi_morp))
+  groups <- character(length(check))
+  values <- character(length(check))
+  for (i in 1:4) {
+    pos <- loc_basi_morp[[i]]
+    idx <- match(pos, check)
+    idx <- idx[!is.na(idx)]
+    if (length(idx) == 0) {
+      next
+    }
+    groups[idx] <- paste0(
+      ifelse(groups[idx] == "", "G-", paste0(groups[idx], "/")),
+      sprintf("%02d", i)
+    )
+    values[idx] <- paste0(
+      basi[pos],
+      "/",
+      morp[pos],
+      "/",
+      topo[pos],
+      "/",
+      beha[pos]
+    )
+  }
+
   # output result
-  res <- list()
-  class(res) <- c("check", "basi/morp")
-  res$check_item <- "Basi/Morphology"
-  res$check_standard <- std
-  res$check_version <- "ICDO3.2/ENCR"
-  res$data <- data
-  res$check <- check
-  res$type <- type
-  res$error_code <- error_code
-  res$error_desc <- error_desc
-  
+  res <- structure(
+    list(
+      check_item = "Basi/Morp/Topo/Beha",
+      check = check,
+      data = values,
+      type = "W-BDMO",
+      group = groups
+    ),
+    class = c("check", "basi/morp")
+  )
+
   if (!quiet) {
-    summary(res)  
+    summary(res)
   }
+
   invisible(res)
 }

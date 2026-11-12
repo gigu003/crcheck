@@ -4,15 +4,22 @@
 \alias{gen_morp}
 \title{Generate valid ICDO3 morphology codes from range of numbers.}
 \usage{
-gen_morp(x, na_drop = TRUE)
+gen_morp(x, na_drop = TRUE, show_beha = FALSE)
 }
 \arguments{
 \item{x}{Numbers}
 
 \item{na_drop}{Logical value indicates whether drop NA values or not.}
+
+\item{show_beha}{Logical. If \code{TRUE}, return valid ICD-O-3 morphology
+codes with corresponding behaviour codes in \code{"morp/beha"} format
+(e.g., \code{"8440/3"}). The mapping is based on \code{IARC_BehaMorpRule}.
+A morphology code may map to multiple behaviour codes, in which
+case multiple entries are returned. Default is \code{FALSE}.}
 }
 \value{
-Vector of valid ICDO3 morphology codes.
+Vector of valid ICDO3 morphology codes. When \code{show_beha = TRUE},
+returns a character vector in \code{"morp/beha"} format.
 }
 \description{
 Generate valid ICDO3 morphology codes from range of numbers.
@@ -20,4 +27,5 @@ Generate valid ICDO3 morphology codes from range of numbers.
 \examples{
 gen_morp(8000:8090)
 gen_morp(8500:8700)
+gen_morp(8440, show_beha = TRUE)
 }

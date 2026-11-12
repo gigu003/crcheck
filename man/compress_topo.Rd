@@ -4,10 +4,10 @@
 \alias{compress_topo}
 \title{Compress ICD-O-3 topography codes}
 \usage{
-compress_topo(topo, sep = ",", conn = "-", min_range = 3)
+compress_topo(x, sep = ",", conn = "-", min_range = 3)
 }
 \arguments{
-\item{topo}{A character vector of ICD-O-3 topography codes (e.g., "C17.0").}
+\item{x}{A character vector of ICD-O-3 topography codes (e.g., "C17.0").}
 
 \item{sep}{A string used to separate values in the output. Default is (",").}
 
@@ -24,7 +24,7 @@ Otherwise, list each code individually. Additionally, compress sequential
 top-level codes (e.g., "C01,C02,C03" → "C01-C03") when possible.
 }
 \examples{
-compress_topo(c("C17.0", "C17.1", "C17.2", "C17.3", "C17.4", 
+compress_topo(c("C17.0", "C17.1", "C17.2", "C17.3", "C17.4",
                 "C17.5", "C17.6", "C17.7", "C17.8", "C17.9"))
 
 compress_topo(c("C17.0", "C17.2", "C17.9"))

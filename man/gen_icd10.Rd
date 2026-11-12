@@ -2,22 +2,35 @@
 % Please edit documentation in R/generate.R
 \name{gen_icd10}
 \alias{gen_icd10}
-\title{Generate valid ICD10 codes from ranges of numbers}
+\title{Generate ICD-10 codes from numeric ranges}
 \usage{
-gen_icd10(x, init = "C", na_drop = TRUE)
+gen_icd10(
+  x,
+  init = c("C", "D"),
+  na_drop = TRUE,
+  not_icdo3 = FALSE,
+  special = FALSE
+)
 }
 \arguments{
-\item{x}{Numbers}
+\item{x}{Numeric or integer vector.}
 
-\item{init}{Initial letter, "C" or "D"}
+\item{init}{Character scalar. Prefix of ICD-10 code.
+Must be either \code{"C"} or \code{"D"}.}
 
-\item{na_drop}{Logical value indicates whether drop NA values or not.}
+\item{na_drop}{Logical. If \code{TRUE}, remove invalid values converted to \code{NA}.}
+
+\item{not_icdo3}{Logical. If \code{TRUE} and \code{init = "C"},
+only return codes that are not included in ICD-O-3 topography codes.}
+
+\item{special}{Logical. If \code{TRUE}, only keep speical ICD10 codes.}
 }
 \value{
-Vector of ICD10 codes.
+A character vector of ICD-10 codes.
 }
 \description{
-Generate valid ICD10 codes from ranges of numbers
+Convert numeric values to ICD-10 topography-style codes
+(e.g. \code{180 -> "C18.0"}).
 }
 \examples{
 gen_icd10(180:229)

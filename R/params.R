@@ -5,12 +5,10 @@
 #'   \item \code{check_item}: Character contains item or items combination
 #'          being checked.
 #'   \item \code{check_standard}: Character contains the standard used
-#'   \item \code{check_version}:  Character contains the version of the
-#'          standard used.
 #'   \item \code{data}: A list contains the input data.
 #'   \item \code{check}: A logical vector indicating whether each code passed
 #'          the checks.
-#'   \item \code{type}: A numeric vector categorizing validation results, 
+#'   \item \code{type}: A numeric vector categorizing validation results,
 #'       \itemize{
 #'         \item \code{1}: Correct
 #'         \item \code{2}: Warning
@@ -25,7 +23,7 @@
 NULL
 
 #' Standard
-#' 
+#'
 #' @param std Character, indicate the standard used to check the validation of
 #'        the item or items combination, options are "iacr" or "encr".
 #' @name param_std
@@ -33,16 +31,16 @@ NULL
 NULL
 
 #' show_summary
-#' 
-#' @param show_summary Logical, whether to display a summary of the validation 
-#'                     results. Defaults to `TRUE`. If `FALSE`, only the result 
+#'
+#' @param show_summary Logical, whether to display a summary of the validation
+#'                     results. Defaults to `TRUE`. If `FALSE`, only the result
 #'                     object will be returned.
 #' @name param_show_summary
 #' @keywords internal
 NULL
 
 #' sex
-#' 
+#'
 #' @param sex A character vector to be checked whether comply with the gender
 #'        coding rules.
 #' @name param_sex
@@ -50,7 +48,7 @@ NULL
 NULL
 
 #' Topography
-#' 
+#'
 #' @param topo A character vector to be checked whether comply with the ICD-O-3
 #'        topography coding rules, which indicate the topography cancer sites,
 #'        e.g.(C50.9). Invalid codes (e.g., missing decimal points or
@@ -62,7 +60,7 @@ NULL
 NULL
 
 #' Morphology
-#' 
+#'
 #' @param morp A character vector to be checked whether comply with the ICD-O-3
 #'        morphology coding rules, which is a 4-digit numerical code ranging
 #'        from 8000 to 9993 indicate the cancer histology, but it is not
@@ -76,7 +74,7 @@ NULL
 NULL
 
 #' Behaviour
-#' 
+#'
 #' @param beha A character vector to be checked whether comply with the ICD-O-3
 #'        behaviour coding rules, which is a one-digit numerical code (0, 1, 2,
 #'        3, 6, 9), and indicate the cancer behaviour. Invalid codes will be
@@ -88,7 +86,7 @@ NULL
 NULL
 
 #' Grade
-#' 
+#'
 #' @param grad A character vector to be checked whether comply with the ICD-O-3
 #'        grade coding rules, which is a one-digit numerical code ranging from
 #'        1 to 9, and indicate the grade of cancer development. Invalid codes
@@ -100,7 +98,7 @@ NULL
 NULL
 
 #' Basis
-#' 
+#'
 #' @param basi A character vector to be checked whether comply with the basis
 #'        coding rules of cancer diagnosis, which is a one-digit numerical code
 #'        of (0, 1, 2, 4, 5, 7, 9). Invalid codes
@@ -110,7 +108,7 @@ NULL
 NULL
 
 #' ICD10
-#' 
+#'
 #' @param icd10 A character vector to be checked whether comply with the ICD10
 #'        coding rules in tumor part. Invalid codes will be flagged during
 #'        validation. For more details about the rules, refer to the official
@@ -120,14 +118,14 @@ NULL
 NULL
 
 #' Incidence
-#' 
+#'
 #' @param inciden Date vector corresponding to the cancer incidence date.
 #' @name param_inciden
 #' @keywords internal
 NULL
 
 #' Birth date
-#' 
+#'
 #' @param birthda Date vector corresponding to the birth date of cancer
 #'        patients.
 #' @name param_birthda
@@ -135,7 +133,7 @@ NULL
 NULL
 
 #' Nationalities
-#' 
+#'
 #' @param trib Character vector to be checked whether comply with code of
 #'        nationalities of GB3304-91 in China.
 #' @name param_trib
@@ -143,7 +141,7 @@ NULL
 NULL
 
 #' Occupation
-#' 
+#'
 #' @param occu Character vector to be checked whether comply with code of
 #'        occupation of GB/T2261.4 in China.
 #' @name param_occu

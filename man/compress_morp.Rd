@@ -4,7 +4,14 @@
 \alias{compress_morp}
 \title{Compress a morphology code vector into a compact range string}
 \usage{
-compress_morp(x, sep = ",", pattern = "\%04d", conn = "-", min_range = 3)
+compress_morp(
+  x,
+  sep = ",",
+  pattern = "\%04d",
+  conn = "-",
+  min_range = 3,
+  warn = TRUE
+)
 }
 \arguments{
 \item{x}{A numeric or integer vector of morphology codes.}
@@ -15,7 +22,9 @@ compress_morp(x, sep = ",", pattern = "\%04d", conn = "-", min_range = 3)
 
 \item{conn}{A character used to connect range start and end. Default is "-".}
 
-\item{min_range}{Integer. Minimum length of a run to compress. Default is 3.}
+\item{min_range}{Integer, Minimum length of a run to compress. Default is 3.}
+
+\item{warn}{Logical, whether output the warnring message.}
 }
 \value{
 A character string with compressed ranges.
@@ -26,6 +35,6 @@ character string using hyphens for consecutive values and commas for
 separation.
 }
 \examples{
-compress_morp(c(8000, 8001, 8002, 8003, 9594, 8006))
+compress_morp(c(8000, 8001, 8002, 8003))
 compress_morp(c(8000, 8001, 8002), min_range = 4)
 }

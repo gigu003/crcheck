@@ -1,0 +1,208 @@
+---
+title: "End-to-end quality checking for cancer registry data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{End-to-end quality checking for cancer registry data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Cancer registry quality control is most useful as a repeatable workflow. A
+typical review starts with structural and internal consistency checks, then
+looks for records that may belong to the same person, and finally assesses
+whether multiple tumours for a confirmed person may represent multiple primary
+cancers.
+
+This vignette demonstrates that workflow with a small synthetic data frame. The
+records do not describe real people.
+
+## Prepare the registry data
+
+`crcheck` works with ordinary data frames. The package recognises common cancer
+registry field names case-insensitively. Include a stable record identifier so
+that every reported issue can be traced back to its source record.
+
+```{r data}
+library(crcheck)
+
+registry <- data.frame(
+  registr = sprintf("CR-%03d", 1:4),
+  id = c(
+    "11010519491231002X",
+    "11010519491231002X",
+    "110105194912310038",
+    ""
+  ),
+  name = c("Zhang San", "Zhang San", "Li Si", "Wang Wu"),
+  sex = c(1, 1, 2, 9),
+  birthda = c(
+    "1949-12-31",
+    "1949-12-31",
+    "1970-06-15",
+    "1985-03-20"
+  ),
+  inciden = c(
+    "2020-01-15",
+    "2021-03-10",
+    "2022-05-20",
+    "2023-01-10"
+  ),
+  topo = c("C18.0", "C34.9", "C61.9", "C50.9"),
+  morp = c(8140, 8140, 8140, 8500),
+  beha = c(3, 3, 3, 3),
+  grad = c(1, 2, 1, 9),
+  basi = c(7, 7, 7, 7),
+  stringsAsFactors = FALSE
+)
+
+registry
+```
+
+Dates can use common registry formats such as `YYYY-MM-DD` or `YYYYMMDD`.
+Topography should use ICD-O-3 site codes such as `C18.0`, and morphology should
+use four-digit ICD-O-3 histology codes such as `8140`. When both `birthda` and
+`inciden` are present, `cr_check()` can derive age for checks that require it.
+
+## Run comprehensive checks
+
+`cr_check()` runs every available check whose required columns are present.
+Setting `quiet = TRUE` suppresses summaries from the individual checks and
+returns one combined result.
+
+```{r comprehensive-check}
+issues <- cr_check(registry, quiet = TRUE)
+issues
+```
+
+The output has five columns:
+
+- `id` identifies the source record. When `registr` is present, it is preferred
+  over the person identity field.
+- `item` names the field or field combination that triggered the result.
+- `value` shows the value or combination that was checked.
+- `type` is the issue code. Codes beginning with `E-` are errors; codes
+  beginning with `W-` are warnings or unusual combinations that need review.
+- `group` identifies the rule group that produced the result.
+
+Errors and warnings can be routed to different review queues.
+
+```{r filter-results}
+errors <- issues[startsWith(issues$type, "E-"), ]
+warnings <- issues[startsWith(issues$type, "W-"), ]
+
+errors
+warnings
+```
+
+Use `show_rules()` to inspect supported rule groups. For example, the
+sex--topography result above points to group `G-02` in the `seto` rules.
+
+```{r inspect-rules}
+sex_topography_rules <- show_rules("seto")
+sex_topography_rules[sex_topography_rules$group == "G-02", ]
+```
+
+The result should be interpreted as a review queue, not as an instruction to
+overwrite source data. Confirm each issue against the registry source, record
+the resolution, and rerun the checks after corrections.
+
+## Identify records that may belong to the same person
+
+Run `check_duplicate_person()` before a multiple-primary assessment when a
+person may have two, three, or more tumour records. Here, `registr` is the
+business record identifier and `id` contains the resident identity number.
+
+```{r duplicate-person}
+duplicates <- check_duplicate_person(
+  registry,
+  record_id = "registr",
+  quiet = TRUE
+)
+
+duplicates$groups
+duplicates$pairs[, c(
+  "record_id_1",
+  "record_id_2",
+  "duplicate_probability",
+  "decision",
+  "probability_source",
+  "grouping_status"
+)]
+duplicates$model
+```
+
+The returned object contains three components:
+
+- `groups` contains records assigned to strict duplicate groups. Singleton
+  records are omitted.
+- `pairs` contains retained pair decisions, probabilities, field-level
+  evidence, and grouping status.
+- `model` records the scoring method, thresholds, candidate counts, and model
+  diagnostics.
+
+By default, probabilities at or above `0.95` are classified as
+`same_person`, while probabilities from `0.50` up to `0.95` are retained for
+review. Agreement between two valid Chinese resident identity numbers is
+treated as verified evidence, which makes this example deterministic.
+
+Grouping is stricter than ordinary graph connectivity. Every pair within a
+group must reach the match threshold. An A--B match and a B--C match do not
+automatically create an A--B--C group when A--C is weak.
+
+Unsupervised linkage probabilities are conditional on candidate generation and
+are not calibrated population probabilities. They should support manual review,
+not trigger automatic merging, deletion, or reassignment of records.
+
+## Check possible multiple primary cancers
+
+The duplicate-person result does not modify the registry. After reviewing the
+evidence, create or update a confirmed patient identifier in the registry's
+controlled workflow. The assignment below represents that completed manual
+adjudication for the synthetic example.
+
+```{r confirmed-person-id}
+registry$patient_id <- c("P001", "P001", "P002", "P003")
+```
+
+Now compare tumour pairs within each confirmed patient using the IARC/IACR 2004
+multiple-primary rules.
+
+```{r multiple-primary}
+primaries <- check_multiple_primary(
+  registry,
+  id = "patient_id",
+  inciden = "inciden",
+  quiet = TRUE
+)
+
+primaries[, c("id", "row_1", "row_2", "rule", "reason")]
+```
+
+Each row is a tumour pair that may represent multiple primary cancers. In this
+example, the two tumours assigned to `P001` have different primary sites. The
+result is evidence for registry review; the final coding decision remains with
+the registry team.
+
+## Operational checklist
+
+For a reproducible production workflow:
+
+1. Preserve the unmodified source records and stable record identifiers.
+2. Run `cr_check()` and separate errors from warnings.
+3. Resolve issues against source documents and retain an audit trail.
+4. Review `check_duplicate_person()` groups and pair evidence before assigning
+   confirmed patient identifiers.
+5. Run `check_multiple_primary()` only after person identity has been
+   adjudicated.
+6. Rerun the checks after corrections and archive the package version,
+   parameters, and outputs used for the review.
+
+These steps keep automated checks, probabilistic evidence, and clinical
+registry decisions distinct while making the complete review reproducible.

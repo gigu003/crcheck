@@ -8,17 +8,28 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Perform internal consistency checks on individual variables or combinations of variables collected in cancer registries, in accordance with the rules of the International Agency for Research on Cancer (IARC) / the International Association of Cancer Registries (IACR).
+Perform internal consistency checks on individual variable or combinations of variables collected in cancer registries, in accordance with the rules of the International Agency for Research on Cancer (IARC) / the International Association of Cancer Registries (IACR).
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/gigu003/crcheck}
+  \item \url{https://gigu003.github.io/crcheck/}
+  \item Report bugs at \url{https://github.com/gigu003/crcheck/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Qiong Chen \email{chenq08@126.com} (\href{https://orcid.org/0000-0003-2401-0046}{ORCID}) (Department of Cancer Epidemiology, The Affiliated Cancer Hospital of Zhengzhou University & Henan Cancer Hospital, Henan Cancer Registry in China) [copyright holder]
+\strong{Maintainer}: Qiong Chen \email{chenq08@126.com} (\href{https://orcid.org/0000-0003-2401-0046}{ORCID}) (affiliation: Department of Cancer Epidemiology, The Affiliated
+ Cancer Hospital of Zhengzhou University & Henan Cancer Hospital,
+ Henan Cancer Registry in China) [copyright holder]
+
+Authors:
+\itemize{
+  \item Qiong Chen \email{chenq08@126.com} (\href{https://orcid.org/0000-0003-2401-0046}{ORCID}) (affiliation: Department of Cancer Epidemiology, The Affiliated
+ Cancer Hospital of Zhengzhou University & Henan Cancer Hospital,
+ Henan Cancer Registry in China) [copyright holder]
+}
 
 }
 \keyword{internal}

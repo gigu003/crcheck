@@ -1,69 +1,69 @@
-#' Check the ICD10 code in the tumor part.
+#' Check ICD-10 consistency with ICD-O-3 codes
 #'
+#' Checks whether an existing ICD-10 code is consistent with the ICD-10 code
+#' converted from ICD-O-3 topography, morphology and behaviour codes.
+#'
+#' @template topo
+#' @template morp
+#' @template beha
 #' @template icd10
 #' @template quiet
+#'
+#' @details
+#' Inputs are standardized before comparison. Records are reported only when
+#' both the existing ICD-10 code and the converted ICD-10 code are available
+#' and differ. Missing, invalid or unmatched values are left to the relevant
+#' single-item checks.
 #'
 #' @template return
 #' @export
 #'
 #' @examples
-#' icd10 <- c("C15.2", "C17.0", "C19.0", "C34.9", "D15.2", "c15.2")
-#' res <- check_icd10(icd10)
+#' topo <- c("C50.9", "C18.0")
+#' morp <- c(8500, 8000)
+#' beha <- c(3, 0)
+#' icd10 <- c("C34.9", "D12.0")
+#' res <- check_icd10(topo, morp, beha, icd10)
 #' print(res)
-check_icd10 <- function(icd10, quiet = TRUE) {
-  miss_valid <- is.na(icd10)
-  form_valid <- !valid_icd10(icd10)
-  range_valid <- unlist(lapply(icd10, range_check))
-  #generate result data
-  data <- list(icd10 = icd10)
-  check <- !Reduce('|', list(miss_valid, form_valid, range_valid))
-  type <- ifelse(check, 1, 3)
-  error_code <- ifelse(miss_valid, "E-MISS",
-                       ifelse(form_valid, "E-FORM",
-                              ifelse(range_valid, "E-OUTR", "C"))
+check_icd10 <- function(topo, morp, beha, icd10, quiet = FALSE) {
+  check_equal_length(
+    topo,
+    morp,
+    beha,
+    icd10,
+    arg_names = c("topo", "morp", "beha", "icd10")
   )
-  error_desc <- ifelse(miss_valid, "001",
-                       ifelse(form_valid, "002",
-                              ifelse(range_valid, "003", "0")))
-  #output result
-  res <- list()
-  class(res) <- c("check", "icd10")
-  res$check_item <- "ICD10"
-  res$check_standard <- "ICD10"
-  res$check_version <- "ICD102019"
-  res$data <- data
-  res$check <- check
-  res$type <- type
-  res$error_code <- error_code
-  res$error_desc <- error_desc
+  check_flag(quiet, "quiet")
+
+  topo_std <- std_topo(topo)
+  morp_std <- std_morp(morp)
+  beha_std <- std_beha(beha)
+  icd10_std <- std_icd10(icd10)
+  expected <- icdo3_to_icd10(topo_std, morp_std, beha_std)
+
+  comparable <- !is.na(icd10_std) & !is.na(expected)
+  check <- which(comparable & icd10_std != expected)
+  values <- paste(
+    topo_std[check],
+    morp_std[check],
+    beha_std[check],
+    icd10_std[check],
+    sep = "/"
+  )
+
+  res <- structure(
+    list(
+      check_item = "Topo/Morp/Beha/ICD10",
+      check = check,
+      data = values,
+      type = rep("E-ICD10", length(check)),
+      group = rep("G-01", length(check))
+    ),
+    class = c("check", "icd10/topo/morp/beha")
+  )
+
   if (!quiet) {
-    summary(res)  
+    summary(res)
   }
   invisible(res)
-}
-
-
-valid_icd10 <- function(icd10) {
-  special_c <- c(1, 7, 12, 19, 20, 23, 33, 37, 52, 55, 56, 58, 61, 64,
-                 65, 66, 73, 97)
-  special_d <- c(24, 27, 34, 45)
-  special_icd10 <- c(sprintf("C%02d", special_c), paste0("D", special_d))
-  special2 <- icd10 %nin% paste0(special_icd10,".0")
-  regular <- grepl("^[CD]\\d{2}\\.\\d$", icd10)
-  check <- ifelse(icd10 %in% special_icd10, TRUE,
-                  ifelse(regular & special2, TRUE, FALSE))
-  return(check)
-}
-
-range_check <- function(x) {
-  init <- toupper(substring(x, 1, 1))
-  icdn <- as.numeric(gsub("[^0-9\\.]", "", x))
-  if (init == "D") {
-    ress <- gen_icd10((icdn * 10), "D", na_drop = FALSE)
-  } else if (init == "C") {
-    ress <- gen_icd10((icdn * 10), na_drop = FALSE)
-  }
-  check <- !(ress == x)
-  check <- ifelse(is.na(check), TRUE, FALSE)
-  return(check)
 }
